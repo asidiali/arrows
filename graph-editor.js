@@ -11,9 +11,15 @@ window.onload = function()
       var item = localStorage.key(i);
       var arr = item.split('-');
       if (arr[0] && arr[1] && arr[2] && arr[0] === 'graph' && arr[1] === 'diagram' && arr[2] === 'markup') {
-        tabs.push(item);
+        var obj = {
+          name: localStorage.getItem("graph-diagram-title-" + arr[3]) || "New Diagram " + arr[3],
+          diagram: item,
+          index: i,
+        };
+        tabs.push(obj);
       }
     }
+    console.log(tabs);
 
     // Default style choice to Bootstrap every time
     localStorage.setItem("graph-diagram-style", "style/graph-style-bootstrap.css");
@@ -30,8 +36,8 @@ window.onload = function()
           console.log(tabTitle);
           document.getElementById("diagram-title").value = tabTitle;
         } else {
-          localStorage.setItem("graph-diagram-title-" + tabIndex, "New Diagram");
-          document.getElementById("diagram-title").value = "New Diagram";
+          localStorage.setItem("graph-diagram-title-" + tabIndex, "New Diagram " + tabIndex);
+          document.getElementById("diagram-title").value = "New Diagram " + tabIndex;
         }
         save( formatMarkup() );
     }
@@ -46,8 +52,8 @@ window.onload = function()
       console.log(document.getElementById("diagram-title").value);
       document.getElementById("diagram-title").value = localStorage.getItem("graph-diagram-title-" + tabIndex);
     } else {
-      localStorage.setItem("graph-diagram-title-" + tabIndex, "New Diagram");
-      document.getElementById("diagram-title").value = "New Diagram";
+      localStorage.setItem("graph-diagram-title-" + tabIndex, "New Diagram " + tabIndex);
+      document.getElementById("diagram-title").value = "New Diagram " + tabIndex;
     }
 
     document.getElementById("diagram-title").addEventListener("blur", function (e) {
