@@ -1,10 +1,32 @@
 window.onload = function()
 {
     var graphModel;
-    if ( !localStorage.getItem( "graph-diagram-markup" ) )
+    var search = window.location.search.substring(1);
+    search = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
+    console.log(search);
+    var tabIndex = search.tab;
+
+    var tabs = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var item = localStorage.key(i);
+      var arr = item.split('-');
+      if (arr[0] && arr[1] && arr[2] && arr[0] === 'graph' && arr[1] === 'diagram' && arr[2] === 'markup') {
+        tabs.push(item);
+      }
+    }
+
+    if ( !localStorage.getItem("graph-diagram-markup-" + tabIndex) )
     {
         graphModel = gd.model();
         graphModel.createNode().x( 0 ).y( 0 );
+        var tabTitle = localStorage.getItem("graph-diagram-title-" + tabIndex);
+        if (tabTitle) {
+          console.log(tabTitle);
+          document.getElementById("diagram-title").value = tabTitle;
+        } else {
+          localStorage.setItem("graph-diagram-title-" + tabIndex, "New Diagram");
+          document.getElementById("diagram-title").value = "New Diagram";
+        }
         save( formatMarkup() );
     }
     if ( localStorage.getItem( "graph-diagram-style" ) )
@@ -12,7 +34,20 @@ window.onload = function()
         d3.select( "link.graph-style" )
             .attr( "href", localStorage.getItem( "graph-diagram-style" ) );
     }
-    graphModel = parseMarkup( localStorage.getItem( "graph-diagram-markup" ) );
+    graphModel = parseMarkup( localStorage.getItem( "graph-diagram-markup-" + tabIndex ) );
+    if (localStorage.getItem("graph-diagram-title-" + tabIndex)) {
+      console.log(localStorage.getItem("graph-diagram-title-" + tabIndex));
+      console.log(document.getElementById("diagram-title").value);
+      document.getElementById("diagram-title").value = localStorage.getItem("graph-diagram-title-" + tabIndex);
+    } else {
+      localStorage.setItem("graph-diagram-title-" + tabIndex, "New Diagram");
+      document.getElementById("diagram-title").value = "New Diagram";
+    }
+
+    document.getElementById("diagram-title").addEventListener("blur", function (e) {
+      console.log(e.target.value);
+        localStorage.setItem("graph-diagram-title-" + tabIndex, e.target.value);
+    })
 
     var svg = d3.select("#canvas")
         .append("svg:svg")
@@ -96,7 +131,7 @@ window.onload = function()
 
     function save( markup )
     {
-        localStorage.setItem( "graph-diagram-markup", markup );
+        localStorage.setItem( "graph-diagram-markup-" + tabIndex, markup );
         localStorage.setItem( "graph-diagram-style", d3.select( "link.graph-style" ).attr( "href" ) );
     }
 
@@ -406,7 +441,7 @@ window.onload = function()
         d3.select("link.graph-style")
             .attr("href", "style/" + selectedStyle);
 
-        graphModel = parseMarkup( localStorage.getItem( "graph-diagram-markup" ) );
+        graphModel = parseMarkup( localStorage.getItem( "graph-diagram-markup-" + tabIndex ) );
         save(formatMarkup());
         draw();
         cancelModal();

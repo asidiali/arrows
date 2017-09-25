@@ -15,6 +15,18 @@ svg.graphdiagram {
     background-color: #f7f7f7;
 }
 
+#diagram-title {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  border: 0 !important;
+  border-bottom: 2px solid #000 !important;
+  outline: none !important;
+  border-radius: 0px;
+  font-size: 1.2em;
+  padding: 10px;
+}
+
 .modal.pop-up-editor.node {
     position: absolute;
 }
