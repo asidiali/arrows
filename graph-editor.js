@@ -1,5 +1,29 @@
 window.onload = function()
 {
+
+    var data = [];
+    $.ajax({
+      url: "https://sheets.googleapis.com/v4/spreadsheets/1gKTHkeExdtrnc4VbYBkDL_VU5B7R4Kei3aC1FRBkxdw/values/a1:c100?key=AIzaSyDj3oIPot7egVqAvtKqP4hHNNkImpXr-Tg",
+      type: "GET",
+      success: function (response) {
+        var values = response.values;
+        var count = values.length;
+        for (var i = 0; i < count; i++) {
+          var title = values[i][0];
+          var html = values[i][1];
+          data.push({
+            title: title,
+            markup: decodeURI(html),
+            index: i + 1,
+          });
+        }
+        run(data);
+      }
+    });
+
+}
+
+function run (data) {
     var graphModel;
     var search = window.location.search.substring(1);
     search = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
@@ -8,8 +32,8 @@ window.onload = function()
 
     function updateTabs() {
       var tabs = [];
-      for (var i = 0; i < localStorage.length; i++) {
-        var item = localStorage.key(i);
+      for (var i = 0; i < data.length; i++) {
+        var item = data.key(i);
         var arr = item.split('-');
         if (arr[0] && arr[1] && arr[2] && arr[0] === 'graph' && arr[1] === 'diagram' && arr[2] === 'markup') {
           var obj = {
@@ -100,8 +124,8 @@ window.onload = function()
     }
 
     document.getElementById("diagram-title").addEventListener("blur", function (e) {
-      console.log(e.target.value);
-        localStorage.setItem("graph-diagram-title-" + tabIndex, e.target.value);
+      localStorage.setItem("graph-diagram-title-" + tabIndex, e.target.value);
+      updateTabs();
     })
 
     var svg = d3.select("#canvas")
