@@ -15,14 +15,17 @@ svg.graphdiagram {
     background-color: #f7f7f7;
 }
 
-#diagram-title {
+.diagram-title-wrapper {
   position: fixed;
   top: 10px;
   left: 10px;
-  border: 0 !important;
-  border-bottom: 2px solid #000 !important;
+  padding: 0;
+}
+#diagram-title {
   outline: none !important;
+  border: 0;
   border-radius: 0px;
+  background: transparent;
   font-size: 1.2em;
   padding: 10px;
 }
