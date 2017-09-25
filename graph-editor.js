@@ -15,6 +15,12 @@ window.onload = function()
       }
     }
 
+    // Default style choice to Bootstrap every time
+    localStorage.setItem("graph-diagram-style", "style/graph-style-bootstrap.css");
+    // graphModel = parseMarkup( localStorage.getItem( "graph-diagram-markup-" + tabIndex ) );
+    // save(formatMarkup());
+    // draw();
+
     if ( !localStorage.getItem("graph-diagram-markup-" + tabIndex) )
     {
         graphModel = gd.model();
