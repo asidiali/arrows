@@ -21,6 +21,7 @@ window.onload = function()
         }
       }
 
+      document.getElementById("tab-menu-list").innerHTML = "";
       if (tabs.length) {
         for (var i = 0; i < tabs.length; i++) {
           var li = document.createElement("li");
@@ -31,6 +32,7 @@ window.onload = function()
         }
       }
     }
+    updateTabs();
 
     // Default style choice to Bootstrap every time
     localStorage.setItem("graph-diagram-style", "style/graph-style-bootstrap.css");
