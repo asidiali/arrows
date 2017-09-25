@@ -6,26 +6,45 @@ window.onload = function()
     console.log(search);
     var tabIndex = search.tab;
 
-    var tabs = [];
-    for (var i = 0; i < localStorage.length; i++) {
-      var item = localStorage.key(i);
-      var arr = item.split('-');
-      if (arr[0] && arr[1] && arr[2] && arr[0] === 'graph' && arr[1] === 'diagram' && arr[2] === 'markup') {
-        var obj = {
-          name: localStorage.getItem("graph-diagram-title-" + arr[3]) || "New Diagram " + arr[3],
-          diagram: item,
-          index: i,
-        };
-        tabs.push(obj);
+    function updateTabs() {
+      var tabs = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var item = localStorage.key(i);
+        var arr = item.split('-');
+        if (arr[0] && arr[1] && arr[2] && arr[0] === 'graph' && arr[1] === 'diagram' && arr[2] === 'markup') {
+          var obj = {
+            name: localStorage.getItem("graph-diagram-title-" + arr[3]) || "New Diagram " + arr[3],
+            diagram: item,
+            index: i,
+          };
+          tabs.push(obj);
+        }
+      }
+
+      if (tabs.length) {
+        for (var i = 0; i < tabs.length; i++) {
+          var li = document.createElement("li");
+          li.appendChild(document.createTextNode(tabs[i].name));
+          li.setAttribute("data-diagram", tabs[i].diagram);
+          li.setAttribute("data-index", tabs[i].index);
+          document.getElementById("tab-menu-list").appendChild(li);
+        }
       }
     }
-    console.log(tabs);
 
     // Default style choice to Bootstrap every time
     localStorage.setItem("graph-diagram-style", "style/graph-style-bootstrap.css");
     // graphModel = parseMarkup( localStorage.getItem( "graph-diagram-markup-" + tabIndex ) );
     // save(formatMarkup());
     // draw();
+
+    document.getElementById("tab-menu-btn").addEventListener("click", function (e) {
+      document.getElementById("tab-menu").style.display = 'block';
+    });
+
+    document.getElementById("close-tab-menu-btn").addEventListener("click", function (e) {
+      document.getElementById("tab-menu").style.display = 'none';
+    });
 
     if ( !localStorage.getItem("graph-diagram-markup-" + tabIndex) )
     {
@@ -145,6 +164,7 @@ window.onload = function()
     {
         localStorage.setItem( "graph-diagram-markup-" + tabIndex, markup );
         localStorage.setItem( "graph-diagram-style", d3.select( "link.graph-style" ).attr( "href" ) );
+        updateTabs();
     }
 
     var newNode = null;

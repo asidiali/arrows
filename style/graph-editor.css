@@ -47,6 +47,14 @@ svg.graphdiagram {
   display: none;
 }
 
+#close-tab-menu-btn {
+  display: block;
+  text-align: right;
+  font-size: 2em;
+  color: grey;
+  padding: 10px;
+}
+
 .modal.pop-up-editor.node {
     position: absolute;
 }
