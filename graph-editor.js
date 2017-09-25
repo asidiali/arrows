@@ -15,13 +15,18 @@ window.onload = function()
           var obj = {
             name: localStorage.getItem("graph-diagram-title-" + arr[3]) || "New Diagram " + arr[3],
             diagram: item,
-            index: i,
+            index: arr[3],
           };
           tabs.push(obj);
         }
       }
 
       document.getElementById("tab-menu-list").innerHTML = "";
+      tabs.sort(function (a, b) {
+        if (a.index > b.index) return 1;
+        if (a.index < b.index) return -1;
+        return 0;
+      });
       if (tabs.length) {
         for (var i = 0; i < tabs.length; i++) {
           var li = document.createElement("li");
@@ -33,6 +38,23 @@ window.onload = function()
       }
     }
     updateTabs();
+
+    document.getElementById("tab-menu-list").addEventListener("click", function (e) {
+      var index = e.target.dataset.index;
+      var url = window.location.href.split("?");
+      window.location.href = url[0] + "?tab=" + index;
+    });
+
+    document.getElementById("new-tab-btn").addEventListener("click", function (e) {
+      var children = document.getElementById("tab-menu-list").children;
+      var count = 0;
+      for (var i = 0; i < children.length; i++) {
+        if (children[i].dataset.index > count) count = children[i].dataset.index;
+      }
+      var url = window.location.href.split("?");
+      var newIndex = parseInt(count, 10) + 1;
+      window.location.href = url[0] + "?tab=" + newIndex;
+    });
 
     // Default style choice to Bootstrap every time
     localStorage.setItem("graph-diagram-style", "style/graph-style-bootstrap.css");

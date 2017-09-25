@@ -42,9 +42,33 @@ svg.graphdiagram {
   z-index: 9999;
   height: 100vh;
   width: 20vw;
-  background: #fff;
+  background: #eee;
   box-shadow: 2px 0 10px 2px rgba(0,0,0,0.2);
   display: none;
+}
+
+#tab-menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid #ddd;
+}
+
+#tab-menu-list > li {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  font-size: 1.1em;
+}
+
+#tab-menu-list > li:hover {
+  background: #fff;
+}
+
+.tab-menu-title {
+  margin: 0;
+  padding: 0 10px;
+  font-size: 1.1em;
 }
 
 #close-tab-menu-btn {
@@ -52,6 +76,13 @@ svg.graphdiagram {
   text-align: right;
   font-size: 2em;
   color: grey;
+  padding: 10px;
+}
+
+#new-tab-btn {
+  margin: 20px;
+  display: block;
+  width: calc(100% - 40px);
   padding: 10px;
 }
 
