@@ -1,5 +1,8 @@
 window.onload = function()
 {
+    var search = window.location.search.substring(1);
+    search = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
+    var tabIndex = search.tab;
 
     var data = [];
     $.ajax({
@@ -17,46 +20,59 @@ window.onload = function()
             index: i + 1,
           });
         }
-        run(data);
+        run(data, tabIndex, data[tabIndex - 1]);
       }
     });
 
 }
 
-function run (data) {
+function updateTitle(index, title) {
+  $.ajax({
+    url: "https://sheets.googleapis.com/v4/spreadsheets/1gKTHkeExdtrnc4VbYBkDL_VU5B7R4Kei3aC1FRBkxdw/values/A" + index + ":A" + index + "?key=AIzaSyDj3oIPot7egVqAvtKqP4hHNNkImpXr-Tg&valueInputOption=raw",
+    data: JSON.stringify({
+      values: [
+        [ title ]
+      ]
+    }),
+    type: "PUT",
+    success: function (response) {
+      console.log(response);
+    }
+  });
+}
+
+function updateMarkup(index, markup) {
+  $.ajax({
+    url: "https://sheets.googleapis.com/v4/spreadsheets/1gKTHkeExdtrnc4VbYBkDL_VU5B7R4Kei3aC1FRBkxdw/values/a1:c100?key=AIzaSyDj3oIPot7egVqAvtKqP4hHNNkImpXr-Tg",
+    type: "GET",
+    success: function (response) {
+      var values = response.values;
+      var count = values.length;
+      for (var i = 0; i < count; i++) {
+        var title = values[i][0];
+        var html = values[i][1];
+        data.push({
+          title: title,
+          markup: decodeURI(html),
+          index: i + 1,
+        });
+      }
+      run(data, tabIndex, data[tabIndex - 1]);
+    }
+  });
+}
+
+function run (data, tabIndex, doc) {
     var graphModel;
-    var search = window.location.search.substring(1);
-    search = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
-    console.log(search);
-    var tabIndex = search.tab;
 
     function updateTabs() {
-      var tabs = [];
-      for (var i = 0; i < data.length; i++) {
-        var item = data.key(i);
-        var arr = item.split('-');
-        if (arr[0] && arr[1] && arr[2] && arr[0] === 'graph' && arr[1] === 'diagram' && arr[2] === 'markup') {
-          var obj = {
-            name: localStorage.getItem("graph-diagram-title-" + arr[3]) || "New Diagram " + arr[3],
-            diagram: item,
-            index: arr[3],
-          };
-          tabs.push(obj);
-        }
-      }
-
       document.getElementById("tab-menu-list").innerHTML = "";
-      tabs.sort(function (a, b) {
-        if (a.index > b.index) return 1;
-        if (a.index < b.index) return -1;
-        return 0;
-      });
-      if (tabs.length) {
-        for (var i = 0; i < tabs.length; i++) {
+      if (data.length) {
+        for (var i = 0; i < data.length; i++) {
           var li = document.createElement("li");
-          li.appendChild(document.createTextNode(tabs[i].name));
-          li.setAttribute("data-diagram", tabs[i].diagram);
-          li.setAttribute("data-index", tabs[i].index);
+          li.appendChild(document.createTextNode(data[i].title));
+          // li.setAttribute("data-diagram", data[i].markup);
+          li.setAttribute("data-index", data[i].index);
           document.getElementById("tab-menu-list").appendChild(li);
         }
       }
@@ -94,16 +110,17 @@ function run (data) {
       document.getElementById("tab-menu").style.display = 'none';
     });
 
-    if ( !localStorage.getItem("graph-diagram-markup-" + tabIndex) )
+    console.log(doc);
+
+    if ( !doc )
     {
         graphModel = gd.model();
         graphModel.createNode().x( 0 ).y( 0 );
-        var tabTitle = localStorage.getItem("graph-diagram-title-" + tabIndex);
         if (tabTitle) {
           console.log(tabTitle);
           document.getElementById("diagram-title").value = tabTitle;
         } else {
-          localStorage.setItem("graph-diagram-title-" + tabIndex, "New Diagram " + tabIndex);
+          // localStorage.setItem("graph-diagram-title-" + tabIndex, "New Diagram " + tabIndex);
           document.getElementById("diagram-title").value = "New Diagram " + tabIndex;
         }
         save( formatMarkup() );
@@ -113,19 +130,18 @@ function run (data) {
         d3.select( "link.graph-style" )
             .attr( "href", localStorage.getItem( "graph-diagram-style" ) );
     }
-    graphModel = parseMarkup( localStorage.getItem( "graph-diagram-markup-" + tabIndex ) );
-    if (localStorage.getItem("graph-diagram-title-" + tabIndex)) {
-      console.log(localStorage.getItem("graph-diagram-title-" + tabIndex));
-      console.log(document.getElementById("diagram-title").value);
-      document.getElementById("diagram-title").value = localStorage.getItem("graph-diagram-title-" + tabIndex);
+    graphModel = parseMarkup( doc.markup );
+    if (doc.title) {
+      document.getElementById("diagram-title").value = doc.title;
     } else {
-      localStorage.setItem("graph-diagram-title-" + tabIndex, "New Diagram " + tabIndex);
+      // localStorage.setItem("graph-diagram-title-" + tabIndex, "New Diagram " + tabIndex);
       document.getElementById("diagram-title").value = "New Diagram " + tabIndex;
     }
 
     document.getElementById("diagram-title").addEventListener("blur", function (e) {
-      localStorage.setItem("graph-diagram-title-" + tabIndex, e.target.value);
-      updateTabs();
+      // localStorage.setItem("graph-diagram-title-" + tabIndex, e.target.value);
+      // updateTabs();
+      updateTitle(tabIndex, e.target.value);
     })
 
     var svg = d3.select("#canvas")
@@ -521,7 +537,7 @@ function run (data) {
         d3.select("link.graph-style")
             .attr("href", "style/" + selectedStyle);
 
-        graphModel = parseMarkup( localStorage.getItem( "graph-diagram-markup-" + tabIndex ) );
+        graphModel = parseMarkup( doc.markup );
         save(formatMarkup());
         draw();
         cancelModal();
