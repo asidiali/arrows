@@ -6,19 +6,12 @@ window.onload = function()
 
     var data = [];
     $.ajax({
-      url: "https://sheets.googleapis.com/v4/spreadsheets/1gKTHkeExdtrnc4VbYBkDL_VU5B7R4Kei3aC1FRBkxdw/values/a1:c100?key=AIzaSyDj3oIPot7egVqAvtKqP4hHNNkImpXr-Tg",
+      url: "https://arrows.sidia.li/diagrams",
       type: "GET",
       success: function (response) {
-        var values = response.values;
-        var count = values.length;
-        for (var i = 0; i < count; i++) {
-          var title = values[i][0];
-          var html = values[i][1];
-          data.push({
-            title: title,
-            markup: decodeURI(html),
-            index: i + 1,
-          });
+        var data = response.data;
+        for (var i = 0; i < data.length; i++) {
+          data[i].markup = decodeURI(data[i].markup);
         }
         run(data, tabIndex, data[tabIndex - 1]);
       }
@@ -26,58 +19,70 @@ window.onload = function()
 
 }
 
-function updateTitle(index, title) {
+function updateTitle(index, title, data) {
   $.ajax({
-    url: "https://sheets.googleapis.com/v4/spreadsheets/1gKTHkeExdtrnc4VbYBkDL_VU5B7R4Kei3aC1FRBkxdw/values/A" + index + ":A" + index + "?key=AIzaSyDj3oIPot7egVqAvtKqP4hHNNkImpXr-Tg&valueInputOption=raw",
+    url: "https://arrows.sidia.li/update/title",
     data: JSON.stringify({
-      values: [
-        [ title ]
-      ]
+      index: index,
+      title: title,
     }),
-    type: "PUT",
+    contentType: "application/json",
+    type: "POST",
     success: function (response) {
+      data[index - 1].title = title;
+      updateTabs(data);
       console.log(response);
     }
   });
 }
 
-function updateMarkup(index, markup) {
+function updateMarkup(index, markup, data) {
   $.ajax({
-    url: "https://sheets.googleapis.com/v4/spreadsheets/1gKTHkeExdtrnc4VbYBkDL_VU5B7R4Kei3aC1FRBkxdw/values/a1:c100?key=AIzaSyDj3oIPot7egVqAvtKqP4hHNNkImpXr-Tg",
-    type: "GET",
+    url: "https://arrows.sidia.li/update/markup",
+    data: JSON.stringify({
+      index: index,
+      markup: markup,
+    }),
+    contentType: "application/json",
+    type: "POST",
     success: function (response) {
-      var values = response.values;
-      var count = values.length;
-      for (var i = 0; i < count; i++) {
-        var title = values[i][0];
-        var html = values[i][1];
-        data.push({
-          title: title,
-          markup: decodeURI(html),
-          index: i + 1,
-        });
-      }
-      run(data, tabIndex, data[tabIndex - 1]);
+      data[index - 1].markup = markup;
+      console.log(response);
     }
   });
+}
+function createNewDiagram(index, callback, data) {
+  $.ajax({
+    url: "https://arrows.sidia.li/new",
+    data: JSON.stringify({
+      index: index,
+    }),
+    contentType: "application/json",
+    type: "POST",
+    success: function (response) {
+      console.log(response);
+      callback();
+    }
+  });
+}
+
+function updateTabs(data) {
+  document.getElementById("tab-menu-list").innerHTML = "";
+  if (data.length) {
+    for (var i = 0; i < data.length; i++) {
+      var li = document.createElement("li");
+      li.appendChild(document.createTextNode(data[i].title));
+      // li.setAttribute("data-diagram", data[i].markup);
+      li.setAttribute("data-index", i + 1);
+      document.getElementById("tab-menu-list").appendChild(li);
+    }
+  }
 }
 
 function run (data, tabIndex, doc) {
     var graphModel;
 
-    function updateTabs() {
-      document.getElementById("tab-menu-list").innerHTML = "";
-      if (data.length) {
-        for (var i = 0; i < data.length; i++) {
-          var li = document.createElement("li");
-          li.appendChild(document.createTextNode(data[i].title));
-          // li.setAttribute("data-diagram", data[i].markup);
-          li.setAttribute("data-index", data[i].index);
-          document.getElementById("tab-menu-list").appendChild(li);
-        }
-      }
-    }
-    updateTabs();
+    updateTabs(data);
 
     document.getElementById("tab-menu-list").addEventListener("click", function (e) {
       var index = e.target.dataset.index;
@@ -93,7 +98,9 @@ function run (data, tabIndex, doc) {
       }
       var url = window.location.href.split("?");
       var newIndex = parseInt(count, 10) + 1;
-      window.location.href = url[0] + "?tab=" + newIndex;
+      createNewDiagram(newIndex, function () {
+        window.location.href = url[0] + "?tab=" + newIndex;
+      }, data);
     });
 
     // Default style choice to Bootstrap every time
@@ -110,19 +117,13 @@ function run (data, tabIndex, doc) {
       document.getElementById("tab-menu").style.display = 'none';
     });
 
-    console.log(doc);
 
     if ( !doc )
     {
         graphModel = gd.model();
         graphModel.createNode().x( 0 ).y( 0 );
-        if (tabTitle) {
-          console.log(tabTitle);
-          document.getElementById("diagram-title").value = tabTitle;
-        } else {
           // localStorage.setItem("graph-diagram-title-" + tabIndex, "New Diagram " + tabIndex);
-          document.getElementById("diagram-title").value = "New Diagram " + tabIndex;
-        }
+        document.getElementById("diagram-title").value = "New Diagram " + tabIndex;
         save( formatMarkup() );
     }
     if ( localStorage.getItem( "graph-diagram-style" ) )
@@ -141,7 +142,7 @@ function run (data, tabIndex, doc) {
     document.getElementById("diagram-title").addEventListener("blur", function (e) {
       // localStorage.setItem("graph-diagram-title-" + tabIndex, e.target.value);
       // updateTabs();
-      updateTitle(tabIndex, e.target.value);
+      updateTitle(tabIndex, e.target.value, data);
     })
 
     var svg = d3.select("#canvas")
@@ -226,9 +227,10 @@ function run (data, tabIndex, doc) {
 
     function save( markup )
     {
-        localStorage.setItem( "graph-diagram-markup-" + tabIndex, markup );
-        localStorage.setItem( "graph-diagram-style", d3.select( "link.graph-style" ).attr( "href" ) );
-        updateTabs();
+        updateMarkup(tabIndex, markup, data);
+        // localStorage.setItem( "graph-diagram-markup-" + tabIndex, markup );
+        // localStorage.setItem( "graph-diagram-style", d3.select( "link.graph-style" ).attr( "href" ) );
+        // updjjjuateTabs();
     }
 
     var newNode = null;
