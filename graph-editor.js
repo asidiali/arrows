@@ -13,6 +13,7 @@ window.onload = function()
         for (var i = 0; i < data.length; i++) {
           data[i].markup = decodeURI(data[i].markup);
         }
+        console.log(data[tabIndex - 1])
         run(data, tabIndex, data[tabIndex - 1]);
       }
     });
