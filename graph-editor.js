@@ -6,7 +6,7 @@ window.onload = function()
 
     var data = [];
     $.ajax({
-      url: "http://165.227.31.154:9191/diagrams",
+      url: "https://arrows.cryptonnect.com/diagrams",
       type: "GET",
       success: function (response) {
         var data = response.data;
@@ -22,7 +22,7 @@ window.onload = function()
 
 function updateTitle(index, title, data) {
   $.ajax({
-    url: "http://165.227.31.154:9191/update/title",
+    url: "https://arrows.cryptonnect.com/update/title",
     data: JSON.stringify({
       index: index,
       title: title,
@@ -39,7 +39,7 @@ function updateTitle(index, title, data) {
 
 function updateMarkup(index, markup, data) {
   $.ajax({
-    url: "http://165.227.31.154:9191/update/markup",
+    url: "https://arrows.cryptonnect.com/update/markup",
     data: JSON.stringify({
       index: index,
       markup: markup,
@@ -54,7 +54,7 @@ function updateMarkup(index, markup, data) {
 }
 function createNewDiagram(index, callback, data) {
   $.ajax({
-    url: "http://165.227.31.154:9191/new",
+    url: "https://arrows.cryptonnect.com/new",
     data: JSON.stringify({
       index: index,
     }),
