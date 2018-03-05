@@ -1,6 +1,6 @@
 window.onload = function()
 {
-    var search = window.location.search.substring(1);
+  var search = window.location.search.substring(1) || '{"tab": "1"}';
     search = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
     var tabIndex = search.tab;
 
