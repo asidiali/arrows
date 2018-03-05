@@ -1,8 +1,11 @@
 window.onload = function()
 {
-    var search = window.location.search.substring(1);
-    console.log(search);
-    search = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}' || '{"tab":"1"}')
+    var search = window.location.search.substring(1).trim();
+    if (search) {
+      search = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
+    } else {
+      search = { tab: 1 };
+    }
     var tabIndex = search.tab;
 
     var data = [];
