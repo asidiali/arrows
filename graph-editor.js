@@ -1,7 +1,8 @@
 window.onload = function()
 {
-  var search = window.location.search.substring(1) || '{"tab": "1"}';
-    search = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
+    var search = window.location.search.substring(1);
+    console.log(search);
+    search = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}' || '{"tab":"1"}')
     var tabIndex = search.tab;
 
     var data = [];
